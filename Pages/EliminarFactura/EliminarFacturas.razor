@@ -1,0 +1,136 @@
+﻿@page "/EliminarFacturas"
+@inject HttpClient httpClient
+@inject NavigationManager navigation
+@inject NotificationService notificationServices
+
+<PageTitle>Eliminar Facturas</PageTitle>
+<RadzenNotification />
+
+<div class="header">
+    <button class="btn btn-outline-success" @onclick="goBack">
+        <i class="bi bi-arrow-left" />
+    </button>
+    <h1 class="titulos" style="font-size: 50px;">Eliminar factura</h1>
+</div>
+<div class="container-fondo">
+    <div class="facturas-container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Nombre</th>
+                    <th>Eliminar</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (facturas == null || facturas.Count == 0)
+                {
+                    <tr>
+                        <td colspan="8" style="text-align: center;">@mensaje</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var facturas in facturas)
+                    {
+                        <tr>
+                            <td>@facturas.FacturaId</td>
+                            <td>@facturas.NombreCliente</td>
+                            <td>
+                                <button class="btn btn-outline-danger" @onclick="() => OpenModal(facturas.FacturaId)">
+                                    <i class="bi bi-trash-fill" />
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal para ingresar el monto de abono -->
+@if (isAbonarModalVisible)
+{
+    <div class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-icon">
+                <img src="css/imagenes/icon-alert.jpg" alt="Alert" />
+            </div>
+            <div class="modal-message">
+                <p>¿Seguro que quieres eliminar esta factura?</p>
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn btn-primary" @onclick="ConfirmDelete">Sí</button>
+                <button type="button" class="btn btn-danger" @onclick="CloseModal">No</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    public List<Factura>? facturas { get; set; }
+    public string mensaje = "";
+    private int? facturaSeleccionadaId = null;
+    private bool isAbonarModalVisible = false;
+
+    private void OpenModal(int facturaId)
+    {
+        facturaSeleccionadaId = facturaId;
+        isAbonarModalVisible = true;
+    }
+
+    private void CloseModal()
+    {
+        isAbonarModalVisible = false;
+    }
+
+    private async Task ConfirmDelete()
+    {
+        if (facturaSeleccionadaId.HasValue)
+        {
+            var response = await httpClient.DeleteAsync($"api/Facturas/{facturaSeleccionadaId.Value}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                var mensajeSuccess = new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Success,
+                        Summary = "Eliminado",
+                        Detail = "Producto eliminado con éxito",
+                        Duration = 1000
+                    };
+                notificationServices.Notify(mensajeSuccess);
+                await OnInitializedAsync();
+            }
+            else
+            {
+                var mensajeError = new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Error,
+                        Summary = "Error",
+                        Detail = "No se pudo eliminar el producto",
+                        Duration = 1000
+                    };
+                notificationServices.Notify(mensajeError);
+            }
+        }
+
+        CloseModal();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        facturas = await httpClient.GetFromJsonAsync<List<Factura>>("api/Facturas");
+
+        if (facturas == null || facturas.Count == 0)
+        {
+            mensaje = "No hay facturas disponibles.";
+            await Task.Delay(3000);
+        }
+    }
+    private void goBack()
+    {
+        navigation.NavigateTo("/");
+    }
+}

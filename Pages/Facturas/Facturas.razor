@@ -1,0 +1,422 @@
+﻿@page "/CrearFactura"
+@using System.Text
+@inject HttpClient httpClient
+@inject NotificationService notificationServices
+@inject NavigationManager navigation
+@* using ESCPOS_NET.Emitters;
+using ESCPOS_NET.Printers; *@
+
+<PageTitle>Crear Factura</PageTitle>
+
+<RadzenNotification />
+
+<div class="header">
+    <button class="btn btn-outline-success" @onclick="goBack">
+        <i class="bi bi-arrow-left" />
+    </button>
+    <h1 class="titulos" style="font-size: 50px;">Inventario</h1>
+</div>
+
+<div class="modal-overlay">
+    <div class="modal-box">
+        <div>
+            <div>
+                <h5 class="modal-title titulos">Crear factura</h5>
+            </div>
+            <div>
+                <form>
+                    <div class="mb-3">
+                        <label for="cliente" class="form-label generic-label">Codigo del cliente</label>
+                        <select class="form-control" id="cliente" @bind="ClienteSeleccionadoId">
+                            <option value="0">Codigo Cliente</option>
+                            @foreach (var cliente in clientes)
+                            {
+                                <option value="@cliente.ClienteId">@cliente.Codigo</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="cliente" class="form-label generic-label">Nombre del cliente</label>
+                        <select class="form-control" id="cliente" @bind="ClienteSeleccionadoId">
+                            <option value="0">Seleccione un cliente</option>
+                            @foreach (var cliente in clientes)
+                            {
+                                <option value="@cliente.ClienteId">@cliente.Nombre</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="producto" class="form-label generic-label">Codigo del producto</label>
+                        <select class="form-control" id="producto" @bind="Producto">
+                            <option value="0">Codigo del producto</option>
+                            @foreach (var producto in productos)
+                            {
+                                <option value="@producto.ProductoId">@producto.ProductoId</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="producto" class="form-label generic-label">Nombre del roducto</label>
+                        <select class="form-control" id="producto" @bind="Producto">
+                            <option value="0">Seleccione un producto</option>
+                            @foreach (var producto in productos)
+                            {
+                                <option value="@producto.ProductoId">@producto.Nombre</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="cantidad" class="form-label generic-label">Cantidad</label>
+                        <input type="number" class="form-control" id="cantidad" @bind="Cantidad" />
+                    </div>
+                </form>
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn btn-primary" @onclick="AgregarDetalle">Agregar</button>
+                <button class="btn btn-danger" @onclick="goBack">
+                    <i class="fas fa-list"></i> Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <button class="add-button" @onclick="AbrirDetallesFactura"><i class="bi bi-cart4" /></button>
+</div>
+
+<!-- Modal para mostrar los detalles de la factura -->
+@if (MostrarDetallesFactura)
+{
+    <div class="modal-overlay-detalles" @onclick="CerrarDetallesFactura">
+        <div class="modal-box-detalles">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title titulos">Detalles de la factura</h5>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Cantidad</th>
+                                <th>Precio</th>
+                                <th>Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var detalle in factura.Detalles)
+                            {
+                                <tr>
+                                    <td>@ObtenerProducto(detalle.CodigoProducto)</td>
+                                    <td>@detalle.Cantidad</td>
+                                    <td>@detalle.PrecioUnitario</td>
+                                    <td>@(detalle.Cantidad * detalle.PrecioUnitario)</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                    <div class="text-end total-text">
+                        <strong class="total-text">Total:</strong> @factura.Total
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-detalles btn-primary" @onclick="AbrirDetallesFactura1">Finalizar</button>
+                    <button type="button" class="btn-detalles btn-  " @onclick="CerrarDetallesFactura">Eliminar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+@if (MostrarDetallesFactura1)
+{
+    <div class="modal-overlay-detalles">
+        <div class="modal-box-detalles">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title titulos">Detalles de la factura</h5>
+                </div>
+                <div class="modal-body">
+
+                    <div class="mb-3">
+                        <label for="Pagado" class="form-label generic-label">Pagado</label>
+                        <input type="number" class="form-control" id="Pagado" @bind="Pagado" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-detalles btn-primary" @onclick="Guardar">Finalizar</button>
+                    <button type="button" class="btn-detalles btn-  " @onclick="CerrarDetallesFactura1">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+@if (MostrarModalDevolucion)
+{
+    <div class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title titulos">Monto a devolver</h5>
+                </div>
+                <div class="modal-message modal-body text-center">
+                    <p><strong>Total de la factura:</strong> @Total</p>
+                    <p><strong>Pagado por el cliente:</strong> @Pagado</p>
+                    <p class="text-danger">
+                        <strong>Monto a devolver:</strong> @(Pagado - Total)
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" @onclick="Finalizar">Aceptar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    public Factura factura = new Factura();
+    public int Producto { get; set; }
+    public int Cantidad { get; set; }
+    public int ClienteSeleccionadoId { get; set; }
+    public float PrecioVenta { get; set; }
+    public float Pagado { get; set; }
+    public float Total { get; set; }
+    public bool MostrarDetallesFactura { get; set; } = false;
+    public bool MostrarDetallesFactura1 { get; set; } = false;
+    public bool MostrarModalDevolucion { get; set; } = false;
+
+    public List<Productos> productos = new List<Productos>();
+    public List<Clientes> clientes = new List<Clientes>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        productos = await httpClient.GetFromJsonAsync<List<Productos>>("api/Productos");
+        clientes = await httpClient.GetFromJsonAsync<List<Clientes>>("api/Clientes");
+    }
+
+    public void AbrirDetallesFactura()
+    {
+        MostrarDetallesFactura = true;
+    }
+
+    public void CerrarDetallesFactura()
+    {
+        MostrarDetallesFactura = false;
+    }
+    public void AbrirDetallesFactura1()
+    {
+        MostrarDetallesFactura1 = true;
+        CerrarDetallesFactura();
+    }
+
+    public void CerrarDetallesFactura1()
+    {
+        MostrarDetallesFactura1 = false;
+        CerrarDetallesFactura();
+    }
+
+    private void goBack()
+    {
+        navigation.NavigateTo("/");
+    }
+
+    public async Task AgregarDetalle()
+    {
+        if (!ValidarDetalleCompleto())
+        {
+            return;
+        }
+
+        var productoSeleccionado = productos.FirstOrDefault(p => p.ProductoId == Producto);
+        var clienteSeleccionado = clientes.FirstOrDefault(c => c.ClienteId == ClienteSeleccionadoId);
+
+        if (productoSeleccionado != null && clienteSeleccionado != null)
+        {
+            if (Cantidad <= productoSeleccionado.Cantidad)
+            {
+                float precioAplicado = clienteSeleccionado.AplicaDescuento
+                    ? productoSeleccionado.PrecioEspecial
+                    : productoSeleccionado.Precio1;
+
+                float precioVentaDetalle = Cantidad * precioAplicado;
+
+                var nuevoDetalle = new DetalleFactura
+                    {
+                        CodigoProducto = productoSeleccionado.ProductoId,
+                        NombreProducto = productoSeleccionado.Nombre,
+                        Cantidad = Cantidad,
+                        PrecioUnitario = precioAplicado
+                    };
+
+                factura.Detalles.Add(nuevoDetalle);
+                factura.Total += precioVentaDetalle;
+                Total += precioVentaDetalle;
+                Producto = 0;
+                Cantidad = 0;
+                StateHasChanged();
+            }
+        }
+    }
+
+    public async Task Guardar()
+    {
+        if (!factura.Detalles.Any())
+        {
+            var mensajeError = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Warning,
+                    Summary = "Factura vacía",
+                    Detail = "La factura debe tener al menos un producto antes de guardarla.",
+                    Duration = 3000
+                };
+            notificationServices.Notify(mensajeError);
+            return;
+        }
+
+        // Buscar el cliente seleccionado
+        var clienteSeleccionado = clientes.FirstOrDefault(c => c.ClienteId == ClienteSeleccionadoId);
+
+        if (clienteSeleccionado == null)
+        {
+            var mensajeError = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error al guardar",
+                    Detail = "Debe seleccionar un cliente válido.",
+                    Duration = 3000
+                };
+            notificationServices.Notify(mensajeError);
+            return;
+        }
+
+        // Asignar el nombre del cliente a la factura
+        factura.CodigoCliente = clienteSeleccionado.ClienteId;
+        factura.NombreCliente = clienteSeleccionado.Nombre;
+        factura.Pagado = Pagado;
+
+        // Enviar la factura a la API
+        var response = await httpClient.PostAsJsonAsync("api/Facturas", factura);
+
+        if (response.IsSuccessStatusCode)
+        {
+            var mensajeExito = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Success,
+                    Summary = "Factura guardada",
+                    Detail = "La factura se guardó correctamente.",
+                    Duration = 3000
+                };
+            notificationServices.Notify(mensajeExito);
+            MostrarModalDevolucion = true;
+            CerrarDetallesFactura();
+
+            // Reiniciar estados
+            factura = new Factura();
+            MostrarDetallesFactura = true;
+
+            StateHasChanged();
+        }
+        else
+        {
+            var errorResponse = await response.Content.ReadAsStringAsync();
+            var mensajeError = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error al guardar",
+                    Detail = $"Error: {errorResponse}",
+                    Duration = 3000
+                };
+            notificationServices.Notify(mensajeError);
+        }
+        CerrarDetallesFactura1();
+    }
+
+    public void Finalizar()
+    {
+        MostrarModalDevolucion = false;
+
+        factura = new Factura();
+        ClienteSeleccionadoId = 0;
+        Producto = 0;
+        Cantidad = 0;
+        Pagado = 0;
+        StateHasChanged();
+    }
+
+
+    public bool ValidarDetalleCompleto()
+    {
+        if (ClienteSeleccionadoId == 0)
+        {
+            var mensajeError = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error al guardar",
+                    Detail = "Debe seleccionar un cliente.",
+                    Duration = 3000
+                };
+            notificationServices.Notify(mensajeError);
+            return false;
+        }
+
+        if (Producto == 0 || Cantidad == 0)
+        {
+            var mensajeError = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error al guardar",
+                    Detail = "Por favor complete todos los campos del detalle y asegúrese de que la cantidad sea mayor que cero",
+                    Duration = 3000
+                };
+            notificationServices.Notify(mensajeError);
+            return false;
+        }
+
+        return true;
+    }
+    public string GenerarContenidoFactura(Factura factura)
+    {
+        var builder = new StringBuilder();
+        builder.AppendLine("======= FACTURA =======");
+        builder.AppendLine("======= RETROGRAFT =======");
+        builder.AppendLine("C/ Juan Bosh #19A, Vista al valle");
+        builder.AppendLine("829-771-9987");
+        builder.AppendLine($"Fecha: {DateTime.Now:dd/MM/yyyy HH:mm}");
+        builder.AppendLine($"Cliente: {factura.NombreCliente}");
+        builder.AppendLine("-----------------------");
+
+        foreach (var detalle in factura.Detalles)
+        {
+            builder.AppendLine($"{detalle.NombreProducto} x{detalle.Cantidad}");
+            builder.AppendLine($"Precio: {detalle.PrecioUnitario:C}  Subtotal: {(detalle.Cantidad * detalle.PrecioUnitario):C}");
+        }
+
+        builder.AppendLine("-----------------------");
+        builder.AppendLine($"Total: {factura.Total:C}");
+        builder.AppendLine($"Pagado: {factura.Pagado:C}");
+        builder.AppendLine($"Devuelto: {(factura.Pagado - factura.Total):C}");
+        builder.AppendLine("=======================");
+        return builder.ToString();
+    }
+
+    // public async Task ImprimirFactura(Factura factura)
+    // {
+    //     var contenido = GenerarContenidoFactura(factura);
+
+    //     // Configurar la impresora térmica
+    //     var printer = new NetworkPrinter("192.168.0.100", 9100); // Cambia a la IP y puerto de tu impresora
+    //     var e = new EPSON();
+
+    //     // Escribir contenido
+    //     printer.Write(e.CenterAlign());
+    //     printer.Write(e.PrintLine(contenido));
+    //     printer.Write(e.PartialCutAfterFeed(2));
+
+    //     await printer.CloseAsync();
+    // }
+
+    public string ObtenerProducto(int id)
+    {
+        var producto = productos.FirstOrDefault(p => p.ProductoId == id);
+        return producto != null ? producto.Nombre : "Producto desconocido";
+    }
+}

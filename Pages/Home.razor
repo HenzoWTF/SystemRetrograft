@@ -1,0 +1,98 @@
+﻿@page "/"
+@inject NavigationManager navigation
+
+<PageTitle>Inicio</PageTitle>
+
+
+<div class="d-flex justify-content-center">
+    <img src="/css/Retrograf.png" style="width: 300px; height: auto; margin-right: 10px;" />
+</div>
+<div class="container fondo">
+    <div class="row justify-content-center mb-3">
+        <div class="col-md-3 text-center">
+            <button class="menu-button" @onclick="IrACrearFactura" style="background-color: #4CAF50; color: white;">Crear factura</button>
+        </div>
+        <div class="col-md-3 text-center">
+            <button class="menu-button" @onclick="IrAEliminarFactura">Eliminar factura</button>
+        </div>
+        <div class="col-md-3 text-center">
+            <button class="menu-button" @onclick="IrACliente">Ver Cliente</button>
+        </div>
+        <div class="col-md-3 text-center">
+            <button class="menu-button" @onclick="IrAInventario">Inventario</button>
+        </div>
+    </div>
+    <div>
+
+    </div>
+    <div class="row justify-content-center mb-3">
+        <div class="col-md-3 text-center">
+            <button class="menu-button" @onclick="IrAVerFactura">Ver factura</button>
+        </div>
+        <div class="col-md-3 text-center">
+            <button class="menu-button" @onclick="IrAEliminarInventario">Eliminar de inventario</button>
+        </div>
+        <div class="col-md-3 text-center">
+            <button class="menu-button" @onclick="IrAEstadisticasMensuales">Estadísticas Mensuales</button>
+        </div>
+        <div class="col-md-3 text-center">
+            <button class="menu-button" @onclick="IrAPersonalizado">Personalizado</button>
+        </div>
+    </div>
+</div>
+
+
+@code {
+
+    private void IrACrearFactura()
+    {
+        navigation.NavigateTo("/CrearFactura");
+    }
+
+    private void IrAEliminarFactura()
+    {
+        navigation.NavigateTo("/EliminarFacturas");
+    }
+    private void IrACliente()
+    {
+        navigation.NavigateTo("/Clientes");
+    }
+    private void IrAInventario()
+    {
+        navigation.NavigateTo("/Inventario");
+    }
+    private void IrAVerFactura()
+    {
+        navigation.NavigateTo("/VerFacturas");
+    }
+    private void IrAEliminarInventario()
+    {
+        navigation.NavigateTo("/InventarioDelete");
+    }
+    private void IrAEstadisticasMensuales()
+    {
+        navigation.NavigateTo("/Calculadora");
+    }
+    private void IrAPersonalizado()
+    {
+        navigation.NavigateTo("/PedidosIndex");
+    }
+    private void IrAPedidosA()
+    {
+        navigation.NavigateTo("/PedidosIndexAdmin");
+    }
+    private void IrAVisitas()
+    {
+        navigation.NavigateTo("/VisitasIndex");
+    }
+
+    private void IrAEntrenadores()
+    {
+        navigation.NavigateTo("/IndexEntrenador");
+    }
+
+    private void IrAConfirmar()
+    {
+        navigation.NavigateTo("/Create_Cita");
+    }
+}

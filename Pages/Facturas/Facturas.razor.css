@@ -1,0 +1,143 @@
+﻿.header {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+}
+
+    .header h1 {
+        flex: 1;
+        text-align: center;
+        font-size: 36px;
+        color: #fff;
+    }
+    
+/* Contenedor del modal */
+.factura-container {
+    background: #fff; /* Fondo blanco */
+    padding: 20px 30px;
+    border-radius: 50px; /* Bordes redondeados */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra */
+    text-align: center;
+    width: 300px;
+    font-family: 'Comic Sans MS', sans-serif;
+}
+
+/* Título del modal */
+.factura-title {
+    font-size: 1.5em;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+/* Botones en el modal */
+.factura-buttons {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.btn {
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.btn-detalles {
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background-color: #4CAF50; /* Verde */
+    color: white;
+}
+
+    .btn-primary:hover {
+        background-color: #45a049;
+    }
+
+.btn-secondary {
+    background-color: #f44336; /* Rojo */
+    color: white;
+}
+
+    .btn-secondary:hover {
+        background-color: #e53935;
+    }
+
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+.modal-overlay-detalles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: right;
+    align-items: center;
+    z-index: 1000;
+    overflow: hidden;
+}
+.modal-box {
+    background-color: #fff;
+    border: 1px solid black;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    width: 400px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+.modal-box-detalles {
+    background-color: #fff;
+    border: 1px solid black;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    width: 400px;
+    height: 900px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+.modal-buttons button {
+    width: 80px;
+    margin: 5px;
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 16px;
+}
+.modal-title {
+    font-size: 1.5em;
+    margin-bottom: 15px;
+    color: #333;
+}
+.add-button {
+    width: 150px;
+    color: black;
+    font-size: 100px;
+    background: none;
+    border: none;
+    position: fixed;
+    bottom: 50px;
+    right: 50px;
+    cursor: pointer;
+}
+
+    .add-button:hover {
+        transform: scale(1.1)
+    }

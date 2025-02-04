@@ -1,0 +1,211 @@
+﻿@page "/Clientes"
+@inject HttpClient httpClient
+@inject NavigationManager navigation
+@inject NotificationService notificationServices
+
+<PageTitle>Clientes</PageTitle>
+<RadzenNotification/>
+
+<div class="header">
+    <button class="btn btn-outline-success" @onclick="goBack">
+        <i class="bi bi-arrow-left" />
+    </button>
+    <h1 class="titulos" style="font-size: 50px">Clientes</h1>
+</div>
+
+<div class="container-fondo">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>-</th>
+                <th>Nombre</th>
+                <th>Editar</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (cliente == null || cliente.Count == 0)
+            {
+                <tr>
+                    <td colspan="7" style="text-align: center;">@mensaje</td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var cliente in cliente)
+                {
+                    <tr>
+                        <td>@cliente.Codigo</td>
+                        <td>-</td>
+                        <td>@cliente.Nombre</td>
+                        <td><button class="btn btn-outline-primary"><i class="bi bi-pencil" /></button></td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+
+    <button class="add-button" @onclick="ShowModal"><i class="bi bi-plus" /></button>
+</div>
+
+
+@if (isModalVisible)
+{
+    <div class="modal show d-block" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Agregar Producto</h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form class="form-grid">
+                        <div class="form-group">
+                            <label for="codigo">Código</label>
+                            <input type="text" id="codigo" class="form-control" @bind="Codigo" />
+                        </div>
+                        <div class="form-group">
+                            <label for="nombre">Nombre</label>
+                            <input type="text" id="nombre" class="form-control" @bind="Nombre" />
+                        </div>
+                        <div class="form-group">
+                            <label for="direccion">Dirección</label>
+                            <input type="text" id="direccion" class="form-control" @bind="Direccion" />
+                        </div>
+                        <div class="form-group">
+                            <label for="ciudad">Ciudad</label>
+                            <input type="text" id="ciudad" class="form-control" @bind="Ciudad" />
+                        </div>
+                        <div class="form-group">
+                            <label for="pais">Pa&iacute;s</label>
+                            <input type="text" id="pais" class="form-control" @bind="Pais" />
+                        </div>
+                        <div class="form-group">
+                            <label for="contacto">Contacto</label>
+                            <input type="text" id="contacto" class="form-control" @bind="Contacto" />
+                        </div>
+                        <div class="form-group">
+                            <label for="telefono">Teléfono</label>
+                            <input type="text" id="telefono" class="form-control" @bind="Telefono" />
+                        </div>
+                        <div class="form-group">
+                            <label for="nota">Nota</label>
+                            <textarea id="nota" class="form-control" @bind="Nota"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="descuento">Aplica Descuento</label>
+                            <input type="checkbox" id="descuento" @bind="AplicaDescuento" />
+                        </div>
+                    </form>
+                </div>
+
+                <div class="modal-buttons">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseModal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" @onclick="AddClientes">Agregar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    public List<Modelos.Clientes>? cliente { get; set; }
+    public string mensaje = "";
+    private bool isModalVisible = false;
+    public string Codigo = string.Empty;
+    public string Nombre = string.Empty;
+    public string Direccion = string.Empty;
+    public string Ciudad = string.Empty;
+    public string Pais = string.Empty;
+    public string Contacto = string.Empty;
+    public string Telefono = string.Empty;
+    public string? Nota = string.Empty;
+    public bool AplicaDescuento = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        cliente = await httpClient.GetFromJsonAsync<List<Modelos.Clientes>>("api/Clientes");
+
+        if (cliente == null || cliente.Count == 0)
+        {
+            mensaje = "No hay clientes disponibles.";
+            await Task.Delay(3000);
+        }
+    }
+
+    private void goBack()
+    {
+        navigation.NavigateTo("/");
+    }
+
+    private void ShowModal()
+    {
+        isModalVisible = true;
+    }
+
+    private void CloseModal()
+    {
+        isModalVisible = false;
+    }
+
+    private async Task AddClientes()
+    {
+        if (!string.IsNullOrWhiteSpace(Nombre) && !string.IsNullOrWhiteSpace(Direccion) && !string.IsNullOrWhiteSpace(Ciudad))
+        {
+            var nuevoCliente = new Modelos.Clientes
+                {
+                    Codigo = Codigo,
+                    Nombre = Nombre,
+                    Direccion = Direccion,
+                    Ciudad = Ciudad,
+                    Pais = Pais,
+                    Contacto = Contacto,
+                    Telefono = Telefono,
+                    Nota = Nota,
+                    AplicaDescuento = AplicaDescuento
+                };
+
+            var response = await httpClient.PostAsJsonAsync("api/Clientes", nuevoCliente);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var mensaje = new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Success,
+                        Summary = "Guardado",
+                        Detail = "Cliente guardado con éxito",
+                        Duration = 1000
+                    };
+                notificationServices.Notify(mensaje);
+                await Task.Delay(1000);
+                await OnInitializedAsync();
+                CloseModal();
+            }
+            else
+            {
+                var mensaje = new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Error,
+                        Summary = "Error al guardar",
+                        Detail = "Ha ocurrido un error",
+                        Duration = 1_000
+                    };
+                notificationServices.Notify(mensaje);
+            }
+        }
+        else
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error al guardar",
+                    Detail = "Por favor, completa todos los campos correctamente.",
+                    Duration = 1_000
+                };
+            notificationServices.Notify(mensaje);
+        }
+    }
+
+
+}
+    

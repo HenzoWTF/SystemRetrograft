@@ -1,0 +1,145 @@
+﻿.header {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+}
+
+    .header h1 {
+        flex: 1;
+        text-align: center;
+        font-size: 36px;
+        color: #fff;
+    }
+
+.table {
+    width: 100%;
+    border-radius: 65px;
+    margin-top: 10px;
+}
+
+    .table th {
+        background-color: #bff0b1;
+        color: #000;
+        padding: 10px;
+        font-size: 20px;
+        text-align: center;
+    }
+
+    .table td {
+        text-align: center;
+        padding: 10px;
+        font-size: 20px;
+    }
+
+    .table tr:nth-child(odd) {
+        background-color: #f2f2f2;
+    }
+
+    .table tr:nth-child(even) {
+        background-color: #e6e6e6;
+    }
+
+.add-button {
+    width: 80px;
+    height: 80px;
+    border-radius: 100%;
+    background-color: #01b1fc;
+    color: white;
+    font-size: 60px;
+    border: none;
+    position: fixed;
+    bottom: 50px;
+    right: 50px;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+    .add-button:hover {
+        background-color: #017fbc;
+    }
+
+/* Contenedor del modal */
+.modal-container {
+    background: #fff; /* Fondo blanco */
+    padding: 20px 30px;
+    border-radius: 50px; /* Bordes redondeados */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra */
+    text-align: center;
+    width: 300px;
+    font-family: Arial, sans-serif;
+}
+
+/* Título del modal */
+.modal-title {
+    font-size: 1.5em;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+/* Botones en el modal */
+.modal-buttons {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.btn {
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background-color: #4CAF50; /* Verde */
+    color: white;
+}
+
+    .btn-primary:hover {
+        background-color: #45a049;
+    }
+
+.btn-secondary {
+    background-color: #f44336; /* Rojo */
+    color: white;
+}
+
+    .btn-secondary:hover {
+        background-color: #e53935;
+    }
+
+/* Inputs estilizados */
+.form-control {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+#descuento {
+    margin-top: 10px;
+}
+
+button.btn-danger {
+    margin-top: 20px;
+    width: 100px;
+    align-self: center;
+}

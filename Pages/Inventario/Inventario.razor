@@ -1,0 +1,200 @@
+﻿@page "/Inventario"
+@inject HttpClient httpClient
+@inject NavigationManager navigation
+@inject NotificationService notificationServices
+
+
+<PageTitle>Inventario</PageTitle>
+<RadzenNotification />
+
+<div class="header">
+    <button class="btn btn-outline-success" @onclick="goBack">
+        <i class="bi bi-arrow-left" />
+    </button>
+    <h1 class="titulos" style="font-size: 50px;">Inventario</h1>
+</div>
+
+<div class="container-fondo">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Nombre</th>
+                <th>Decripci&oacute;n</th>
+                <th>Precio</th>
+                <th>Precio Minimo</th>
+                <th>Precio Especial</th>
+                <th>Cantidad</th>
+                <th>Editar</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (productos == null || productos.Count == 0)
+            {
+                <tr>
+                    <td colspan="7" style="text-align: center;">@mensaje</td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var producto in productos)
+                {
+                    <tr>
+                        <td>@producto.ProductoId</td>
+                        <td>@producto.Nombre</td>
+                        <td>@producto.Descripcion</td>
+                        <td>@producto.Precio1</td>
+                        <td>@producto.Precio2</td>
+                        <td>@producto.PrecioEspecial</td>
+                        <td>@producto.Cantidad</td>
+                        <td><button class="btn btn-outline-primary"><i class="bi bi-pencil"/></button></td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+
+    <button class="add-button" @onclick="ShowModal"><i class="bi bi-plus" /></button>
+</div>
+
+@if (isModalVisible)
+{
+    <div class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title titulos">Agregar Producto</h5>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label for="nombreProducto" class="form-label generic-label">Nombre del Producto</label>
+                            <input type="text" class="form-control" id="nombreProducto" @bind="nombreProducto" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="nombreProducto" class="form-label generic-label">Descripci&oacute;n</label>
+                            <input type="text" class="form-control" id="descripcion" @bind="descripcionProducto" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="precioProducto" class="form-label generic-label">Precio1</label>
+                            <input type="number" class="form-control" id="precioProducto" @bind="precioProducto" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="precioProducto" class="form-label generic-label">Precio2</label>
+                            <input type="number" class="form-control" id="precio1" @bind="precioProducto2" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="precioProducto" class="form-label generic-label">Precio especial</label>
+                            <input type="number" class="form-control" id="precioEspecial" @bind="precioEspecialProducto" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="cantidadProducto" class="form-label generic-label">Cantidad</label>
+                            <input type="number" class="form-control" id="cantidadProducto" @bind="cantidadProducto" />
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-buttons">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseModal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" @onclick="AddProducto">Agregar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+@code {
+    public List<Productos>? productos { get; set; }
+    public string mensaje = "";
+    private bool isModalVisible = false;
+    private string codigoProducto = string.Empty;
+    private string nombreProducto = string.Empty;
+    private float precioProducto;
+    private int cantidadProducto;
+    private string descripcionProducto = string.Empty;
+    private float precioProducto2;
+    private float precioEspecialProducto;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        productos = await httpClient.GetFromJsonAsync<List<Productos>>("api/Productos");
+
+        if (productos == null || productos.Count == 0)
+        {
+            mensaje = "No hay productos disponibles.";
+            await Task.Delay(3000);
+        }
+    }
+
+
+    private void goBack()
+    {
+        navigation.NavigateTo("/");
+    }
+
+    private void ShowModal()
+    {
+        isModalVisible = true;
+    }
+
+    private void CloseModal()
+    {
+        isModalVisible = false;
+    }
+
+    private async Task AddProducto()
+    {
+        if (!string.IsNullOrWhiteSpace(nombreProducto) && cantidadProducto > 0 && precioProducto > 0)
+        {
+            var nuevoProducto = new Productos
+            {
+                    Nombre = nombreProducto,
+                    Descripcion = descripcionProducto,
+                    Precio1 = precioProducto,
+                    Precio2 = precioProducto2,
+                    PrecioEspecial = precioEspecialProducto,
+                    Cantidad = cantidadProducto
+            };
+
+            var response = await httpClient.PostAsJsonAsync("api/Productos", nuevoProducto);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var Mensaje1 = new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Success,
+                        Summary = "Guardado",
+                        Detail = "Contacto guardado con exito",
+                        Duration = 1000
+                    };
+                notificationServices.Notify(Mensaje1);
+                await Task.Delay(1000);
+                await OnInitializedAsync();
+                CloseModal();
+            }
+            else
+            {
+                var Mensaje = new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Error,
+                        Summary = "Error al guardar",
+                        Detail = "Ha ocurrido un error",
+                        Duration = 1_000
+                    };
+                notificationServices.Notify(Mensaje);
+            }
+        }
+        else
+        {
+            var Mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error al guardar",
+                    Detail = "Por favor completa todos los campos correctamente.",
+                    Duration = 1_000
+                };
+            notificationServices.Notify(Mensaje);
+        }
+    }
+}

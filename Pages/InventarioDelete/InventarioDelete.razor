@@ -1,0 +1,150 @@
+﻿@page "/InventarioDelete"
+@inject HttpClient httpClient
+@inject NavigationManager navigation
+@inject NotificationService notificationServices
+
+<PageTitle>Inventario</PageTitle>
+<RadzenNotification />
+
+<div class="header">
+    <button class="btn btn-outline-success" @onclick="goBack">
+        <i class="bi bi-arrow-left" />
+    </button>
+    <h1 class="titulos" style="font-size: 50px;">Inventario</h1>
+</div>
+
+<div class="container-fondo">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Nombre</th>
+                <th>Descripción</th>
+                <th>Precio</th>
+                <th>Precio Minimo</th>
+                <th>Precio Especial</th>
+                <th>Cantidad</th>
+                <th>Eliminar</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (productos == null || productos.Count == 0)
+            {
+                <tr>
+                    <td colspan="8" style="text-align: center;">@mensaje</td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var producto in productos)
+                {
+                    <tr>
+                        <td>@producto.ProductoId</td>
+                        <td>@producto.Nombre</td>
+                        <td>@producto.Descripcion</td>
+                        <td>@producto.Precio1</td>
+                        <td>@producto.Precio2</td>
+                        <td>@producto.PrecioEspecial</td>
+                        <td>@producto.Cantidad</td>
+                        <td>
+                            <button class="btn btn-outline-danger" @onclick="() => ShowModal(producto.ProductoId)">
+                                <i class="bi bi-trash-fill" />
+                            </button>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+@if (isModalVisible)
+{
+    <div class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-icon">
+                <img src="css/imagenes/icon-alert.jpg" alt="Alert" />
+            </div>
+            <div class="modal-message">
+                <p>¿Seguro que quieres eliminar este producto?</p>
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn btn-primary" @onclick="ConfirmDelete">Sí</button>
+                <button type="button" class="btn btn-danger" @onclick="CloseModal">No</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    public List<Productos>? productos { get; set; }
+    public string mensaje = "";
+    private bool isModalVisible = false;
+    private int? productoSeleccionadoId = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarProductos();
+    }
+
+    private async Task CargarProductos()
+    {
+        productos = await httpClient.GetFromJsonAsync<List<Productos>>("api/Productos");
+
+        if (productos == null || productos.Count == 0)
+        {
+            mensaje = "No hay productos disponibles.";
+        }
+    }
+
+    private void goBack()
+    {
+        navigation.NavigateTo("/");
+    }
+
+    private void ShowModal(int productoId)
+    {
+        productoSeleccionadoId = productoId;
+        isModalVisible = true;
+    }
+
+    private void CloseModal()
+    {
+        isModalVisible = false;
+        productoSeleccionadoId = null;
+    }
+
+    private async Task ConfirmDelete()
+    {
+        if (productoSeleccionadoId.HasValue)
+        {
+            var response = await httpClient.DeleteAsync($"api/Productos/{productoSeleccionadoId.Value}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                var mensajeSuccess = new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Success,
+                        Summary = "Eliminado",
+                        Detail = "Producto eliminado con éxito",
+                        Duration = 1000
+                    };
+                notificationServices.Notify(mensajeSuccess);
+                await CargarProductos();
+            }
+            else
+            {
+                var mensajeError = new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Error,
+                        Summary = "Error",
+                        Detail = "No se pudo eliminar el producto",
+                        Duration = 1000
+                    };
+                notificationServices.Notify(mensajeError);
+            }
+        }
+
+        CloseModal();
+    }
+}
