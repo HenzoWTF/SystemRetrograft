@@ -59,35 +59,10 @@
 
 
 
-.btn {
-    padding: 10px 20px;
-    border-radius: 10px;
-    border: none;
-    font-size: 14px;
-    cursor: pointer;
-}
-
-.btn-primary {
-    background-color: #4CAF50; /* Verde */
-    color: white;
-}
-
-    .btn-primary:hover {
-        background-color: #45a049;
-    }
-
-.btn-secondary {
-    background-color: #f44336; /* Rojo */
-    color: white;
-}
-
-    .btn-secondary:hover {
-        background-color: #e53935;
-    }
 
 /* Inputs estilizados */
 .form-control {
-    width: 100%;
+    width: 10%;
     padding: 10px;
     margin-bottom: 10px;
     border: 1px solid #ccc;
@@ -105,7 +80,7 @@
     height: 100%;
     background: rgba(0, 0, 0, 0.3);
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     justify-content: center;
 }
 
@@ -114,7 +89,7 @@
     border-radius: 20px;
     border: 3px solid red;
     padding: 20px;
-    width: 1000px;
+    width: 500px;
     text-align: center;
 }
 
@@ -204,4 +179,31 @@
 
     .btn-cobrar:hover {
         background-color: #218838;
+    }
+
+.factura-info {
+    text-align: left;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.factura-total {
+    text-align: right;
+    font-size: 16px;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.btn-cerrar {
+    margin-top: 10px;
+    background: red;
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+    .btn-cerrar:hover {
+        background: darkred;
     }
