@@ -110,8 +110,8 @@
                 <hr>
 
                 <div class="factura-total">
+                    <p><strong>Deuda:</strong> @facturaSeleccionada.Deuda.ToString("C")</p>
                     <p><strong>Total:</strong> @facturaSeleccionada.Total.ToString("C")</p>
-                    <p><strong>Total:</strong> @facturaSeleccionada.Deuda.ToString("C")</p>
                 </div>
             </div>
         </div>
@@ -136,7 +136,7 @@
         {
             factura.Pagado += monto;
 
-            var response = await httpClient.PutAsJsonAsync($"api/Facturas/{facturaId}/abonar", factura);
+            var response = await httpClient.PutAsJsonAsync($"api/Facturas/{facturaId}", factura);
             if (response.IsSuccessStatusCode)
             {
                 facturasFiltradas = facturas.Where(f => filtroSeleccionado == "pendientes" ? f.Deuda > 0 : true).ToList();

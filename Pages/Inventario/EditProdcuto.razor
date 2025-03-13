@@ -1,0 +1,252 @@
+﻿@page "/EditClientes/{ProductoId}"
+@inject HttpClient httpClient
+@inject NavigationManager navigation
+@inject NotificationService notificationServices
+
+<PageTitle>Inventario</PageTitle>
+<RadzenNotification />
+
+<div class="header">
+    <button class="btn btn-outline-success" @onclick="goBack">
+        <i class="bi bi-arrow-left" />
+    </button>
+    <h1 class="titulos" style="font-size: 50px;">Inventario</h1>
+</div>
+<!-- Modal principal para agregar producto -->
+<div class="modal-overlay">
+    <div class="modal-box">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title titulos">Agregar Producto</h5>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label for="nombreProducto" class="form-label generic-label">Nombre del Producto</label>
+                        <input type="text" class="form-control" id="nombreProducto" @bind="productos.Nombre" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="descripcion" class="form-label generic-label">Descripción</label>
+                        <input type="text" class="form-control" id="descripcion" @bind="productos.Descripcion" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="precioProducto" class="form-label generic-label">Precio1</label>
+                        <input type="number" class="form-control" id="precioProducto" @bind="productos.Precio1" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="precio1" class="form-label generic-label">Precio2</label>
+                        <input type="number" class="form-control" id="precio1" @bind="productos.Precio2" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="precioEspecial" class="form-label generic-label">Precio especial</label>
+                        <input type="number" class="form-control" id="precioEspecial" @bind="productos.PrecioEspecial" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="cantidadProducto" class="form-label generic-label">Cantidad</label>
+                        <input type="number" class="form-control" id="cantidadProducto" @bind="productos.Cantidad" />
+                    </div>
+
+                    <!-- Botón para abrir el modal de personalización -->
+                    <div class="mb-3">
+                        <label for="personalizacion" class="form-label">Personalización</label>
+                        <input type="checkbox" @bind="isPersonalizacion" />
+                    </div>
+
+                    @if (isPersonalizacion)
+                    {
+                        <button type="button" class="btn btn-info" @onclick="ShowPersonalizationModal">Configurar Personalización</button>
+                    }
+                </form>
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn btn-secondary" @onclick="CloseModal">Cerrar</button>
+                @* <button type="button" class="btn btn-primary" @onclick="Guardar">Agregar</button> *@
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (isPersonalizationModalVisible)
+{
+    <!-- Modal de personalización (tallas, materiales, posiciones) -->
+    <div class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title titulos">Configurar Personalización</h5>
+                </div>
+                <div class="modal-body">
+                    <!-- Tallas -->
+                    <div class="mb-3">
+                        <h5>Tallas</h5>
+                        <form>
+                            @foreach (var producto in productos.Tallas)
+                            {
+                                <div class="form-group">
+                                    <label>Nombre</label>
+                                    <input type="text" id="codigo" class="form-control" @bind="producto.Nombre" />
+                                    <label>Precio</label>
+                                    <input type="number" class="form-control" placeholder="Precio de talla"
+                                    @bind="producto.Precio" />
+                                    <label>Precio Especial</label>
+                                    <input type="number" class="form-control" placeholder="Precio de talla"
+                                    @bind="producto.PrecioEspecial" />
+                                </div>
+                            }
+                        </form>
+
+                    </div>
+
+                    <!-- Materiales -->
+                    <div class="mb-3">
+                        <h5>Materiales</h5>
+                        <form>
+                            @foreach (var materiales in productos.Materiales){
+                                <div class="form-group">
+                                    <label>Nombre</label>
+                                    <input type="text" id="codigo" class="form-control" @bind="materiales.Nombre" />
+                                    <label>Precio</label>
+                                    <input type="number" class="form-control" placeholder="Precio de talla"
+                                    @bind="materiales.Precio" />
+                                    <label>Precio Especial</label>
+                                    <input type="number" class="form-control" placeholder="Precio de talla"
+                                    @bind="materiales.PrecioEspecial" />
+                                </div>
+                            }
+                        </form>
+
+                    </div>
+                    <!-- Posiciones -->
+                    <div class="mb-3">
+                        @if (productos.Tallas.Any())
+                        {
+                            <table class="tableModal" style="width: 60%;">
+                                <thead>
+                                    <tr>
+                                        <th>Nombre</th>
+                                        <th>Precio</th>
+                                        <th>Precio Especial</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var talla in productos.Tallas)
+                                    {
+                                        <tr>
+                                            <td>@talla.Nombre</td>
+                                            <td>@talla.Precio</td>
+                                            <td>@talla.PrecioEspecial</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                        @if (productos.Materiales.Any())
+                        {
+                            <table class="tableModal" style="width: 60%;">
+                                <thead>
+                                    <tr>
+                                        <th>Nombre</th>
+                                        <th>Precio</th>
+                                        <th>Precio Especial</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var material in productos.Materiales)
+                                    {
+                                        <tr>
+                                            <td>@material.Nombre</td>
+                                            <td>@material.Precio</td>
+                                            <td>@material.PrecioEspecial</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                        @if (productos.Posiciones.Any())
+                        {
+                            <table class="tableModal table-sm mt-2" style="width: 60%;">
+                                <thead>
+                                    <tr>
+                                        <th>Nombre</th>
+                                        <th>Precio</th>
+                                        <th>Precio Especial</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var posicion in productos.Posiciones)
+                                    {
+                                        <tr>
+                                            <td>@posicion.NombrePosicion</td>
+                                            <td>@posicion.Precio</td>
+                                            <td>@posicion.PrecioEspecial</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                    </div>
+                </div>
+
+                <div class="modal-buttons">
+                    <button type="button" class="btn btn-secondary" @onclick="ClosePersonalizationModal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+@code {
+    public int ProductoId { get; set; }
+    public Productos productos = new Productos();
+    public string mensaje = "";
+    private bool isModalVisible = false;
+    private bool isPersonalizacion = false;
+    private bool isPersonalizationModalVisible = false;
+
+    private void ShowPersonalizationModal() => isPersonalizationModalVisible = true;
+    private void ClosePersonalizationModal() => isPersonalizationModalVisible = false;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        productos = await httpClient.GetFromJsonAsync<Productos>("api/Productos/{ProductoId}");
+
+        if (productos == null)
+        {
+            mensaje = "No hay productos disponibles.";
+            await Task.Delay(3000);
+        }
+    }
+
+
+    private void goBack()
+    {
+        navigation.NavigateTo("/");
+    }
+
+    private void ShowModal()
+    {
+        isModalVisible = true;
+    }
+
+    private void CloseModal()
+    {
+        isModalVisible = false;
+    }
+
+    // public async Task Guardar()
+    // {
+
+    //     if (productos)
+    //     {
+    //         await httpClient.PutAsJsonAsync<Productos>("api/Productos/{ProductoId}");
+    //     }
+    //     else
+    //     {
+    //         await ClientesServices.Insertar(productos);
+    //     }
+    //     Volver();
+    // }
+
+}

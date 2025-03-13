@@ -3,8 +3,6 @@
 @inject HttpClient httpClient
 @inject NotificationService notificationServices
 @inject NavigationManager navigation
-@* using ESCPOS_NET.Emitters;
-using ESCPOS_NET.Printers; *@
 
 <PageTitle>Crear Factura</PageTitle>
 
@@ -19,8 +17,8 @@ using ESCPOS_NET.Printers; *@
 
 <div class="modal-overlay">
     <div class="modal-box">
-        <div>
-            <div>
+        <div class="modal-content">
+            <div class="modal-body">
                 <form>
                     <div class="mb-3">
                         <label for="cliente" class="form-label generic-label">Codigo del cliente</label>
@@ -32,6 +30,7 @@ using ESCPOS_NET.Printers; *@
                             }
                         </select>
                     </div>
+
                     <div class="mb-3">
                         <label for="cliente" class="form-label generic-label">Nombre del cliente</label>
                         <select class="form-control" id="cliente" @bind="ClienteSeleccionadoId">
@@ -42,10 +41,15 @@ using ESCPOS_NET.Printers; *@
                             }
                         </select>
                     </div>
+
                     <div class="mb-3">
-                        <label for="producto" class="form-label generic-label">Codigo del producto</label>
+                        <label for="cantidad" class="form-label generic-label">Cantidad</label>
+                        <input type="number" class="form-control" id="cantidad" @bind="Cantidad" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="producto" class="form-label generic-label">Código del producto</label>
                         <select class="form-control" id="producto" @bind="Producto">
-                            <option value="0">Codigo del producto</option>
+                            <option value="0">Código del producto</option>
                             @foreach (var producto in productos)
                             {
                                 <option value="@producto.ProductoId">@producto.ProductoId</option>
@@ -53,7 +57,7 @@ using ESCPOS_NET.Printers; *@
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="producto" class="form-label generic-label">Nombre del roducto</label>
+                        <label for="producto" class="form-label generic-label">Nombre del producto</label>
                         <select class="form-control" id="producto" @bind="Producto">
                             <option value="0">Seleccione un producto</option>
                             @foreach (var producto in productos)
@@ -63,9 +67,18 @@ using ESCPOS_NET.Printers; *@
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="cantidad" class="form-label generic-label">Cantidad</label>
-                        <input type="number" class="form-control" id="cantidad" @bind="Cantidad" />
+                        <label for="cantidad" class="form-label generic-label">Forma de pago</label>
+                        <input type="text" class="form-control" id="descripcion" value="Efectivo" readonly />
                     </div>
+                    <div class="mb-3">
+                        <label for="personalizacion" class="form-label">Personalización</label>
+                        <input type="checkbox" @bind="isPersonalizacion" />
+                    </div>
+
+                    @if (isPersonalizacion)
+                    {
+                        
+                    }
                 </form>
             </div>
             <div class="modal-buttons">
@@ -117,7 +130,7 @@ using ESCPOS_NET.Printers; *@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn-detalles btn-primary" @onclick="AbrirDetallesFactura1">Finalizar</button>
-                    <button type="button" class="btn-detalles btn-  " @onclick="CerrarDetallesFactura">Eliminar</button>
+                    <button type="button" class="btn-detalles btn-danger" @onclick="CerrarDetallesFactura">Eliminar</button>
                 </div>
             </div>
         </div>
@@ -140,7 +153,7 @@ using ESCPOS_NET.Printers; *@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn-detalles btn-primary" @onclick="Guardar">Finalizar</button>
-                    <button type="button" class="btn-detalles btn-  " @onclick="CerrarDetallesFactura1">Cancelar</button>
+                    <button type="button" class="btn-detalles btn-danger" @onclick="CerrarDetallesFactura1">Cancelar</button>
                 </div>
             </div>
         </div>
@@ -180,14 +193,22 @@ using ESCPOS_NET.Printers; *@
     public bool MostrarDetallesFactura { get; set; } = false;
     public bool MostrarDetallesFactura1 { get; set; } = false;
     public bool MostrarModalDevolucion { get; set; } = false;
+    private bool isPersonalizacion = false;
 
     public List<Productos> productos = new List<Productos>();
     public List<Clientes> clientes = new List<Clientes>();
+
+    public Productos productoSeleccionado { get; set; }
+    public int TallaSeleccionada { get; set; }
+    public int MaterialSeleccionado { get; set; }
+    public int PosicionSeleccionada { get; set; }
+
 
     protected override async Task OnInitializedAsync()
     {
         productos = await httpClient.GetFromJsonAsync<List<Productos>>("api/Productos");
         clientes = await httpClient.GetFromJsonAsync<List<Clientes>>("api/Clientes");
+
     }
 
     public void AbrirDetallesFactura()
@@ -241,7 +262,7 @@ using ESCPOS_NET.Printers; *@
                         CodigoProducto = productoSeleccionado.ProductoId,
                         NombreProducto = productoSeleccionado.Nombre,
                         Cantidad = Cantidad,
-                        PrecioUnitario = precioAplicado
+                        PrecioUnitario = precioAplicado,
                     };
 
                 factura.Detalles.Add(nuevoDetalle);
@@ -249,11 +270,13 @@ using ESCPOS_NET.Printers; *@
                 Total += precioVentaDetalle;
                 Producto = 0;
                 Cantidad = 0;
+                TallaSeleccionada = 0;
+                MaterialSeleccionado = 0;
+                PosicionSeleccionada = 0;
                 StateHasChanged();
             }
         }
     }
-
     public async Task Guardar()
     {
         if (!factura.Detalles.Any())
@@ -394,22 +417,6 @@ using ESCPOS_NET.Printers; *@
         builder.AppendLine("=======================");
         return builder.ToString();
     }
-
-    // public async Task ImprimirFactura(Factura factura)
-    // {
-    //     var contenido = GenerarContenidoFactura(factura);
-
-    //     // Configurar la impresora térmica
-    //     var printer = new NetworkPrinter("192.168.0.100", 9100); // Cambia a la IP y puerto de tu impresora
-    //     var e = new EPSON();
-
-    //     // Escribir contenido
-    //     printer.Write(e.CenterAlign());
-    //     printer.Write(e.PrintLine(contenido));
-    //     printer.Write(e.PartialCutAfterFeed(2));
-
-    //     await printer.CloseAsync();
-    // }
 
     public string ObtenerProducto(int id)
     {

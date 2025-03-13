@@ -95,13 +95,12 @@
     overflow: hidden;
 }
 .modal-box {
-    background-color: #fff;
-    border: 1px solid black;
-    border-radius: 10px;
-    padding: 20px;
-    text-align: center;
-    width: 400px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    background: #fff;
+    width: 60%; /* Aumentar el ancho del modal */
+    max-width: 800px; /* Establecer un máximo para evitar que sea demasiado grande */
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 .modal-box-detalles {
     background-color: #fff;
@@ -141,3 +140,33 @@
     .add-button:hover {
         transform: scale(1.1)
     }
+
+.modal-body {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+    .modal-body .mb-3 {
+        flex: 1 1 calc(33.33% - 15px); /* Ajuste para 3 columnas */
+        min-width: 250px;
+        max-width: calc(33.33% - 15px); /* Evita que se reduzca más */
+    }
+
+
+.modal-body form {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 columnas de igual ancho */
+    gap: 5px; /* Espacio entre los elementos */
+    width: 100%; /* Asegura que el formulario ocupe todo el ancho disponible */
+}
+
+.mb-3 {
+    min-width: 250px; /* Evita que los elementos se hagan demasiado pequeños */
+}
+
+
+.modal-content {
+    display: flex;
+    flex-direction: column;
+}

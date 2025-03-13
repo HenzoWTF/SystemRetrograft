@@ -3,7 +3,6 @@
 @inject NavigationManager navigation
 @inject NotificationService notificationServices
 
-
 <PageTitle>Inventario</PageTitle>
 <RadzenNotification />
 
@@ -47,7 +46,7 @@
                         <td>@producto.Precio2</td>
                         <td>@producto.PrecioEspecial</td>
                         <td>@producto.Cantidad</td>
-                        <td><button class="btn btn-outline-primary"><i class="bi bi-pencil"/></button></td>
+                        <td><button class="btn btn-outline-primary"><i class="bi bi-pencil" /></button></td>
                     </tr>
                 }
             }
@@ -59,6 +58,7 @@
 
 @if (isModalVisible)
 {
+    <!-- Modal principal para agregar producto -->
     <div class="modal-overlay">
         <div class="modal-box">
             <div class="modal-content">
@@ -72,7 +72,7 @@
                             <input type="text" class="form-control" id="nombreProducto" @bind="nombreProducto" />
                         </div>
                         <div class="mb-3">
-                            <label for="nombreProducto" class="form-label generic-label">Descripci&oacute;n</label>
+                            <label for="descripcion" class="form-label generic-label">Descripción</label>
                             <input type="text" class="form-control" id="descripcion" @bind="descripcionProducto" />
                         </div>
                         <div class="mb-3">
@@ -80,17 +80,28 @@
                             <input type="number" class="form-control" id="precioProducto" @bind="precioProducto" />
                         </div>
                         <div class="mb-3">
-                            <label for="precioProducto" class="form-label generic-label">Precio2</label>
+                            <label for="precio1" class="form-label generic-label">Precio2</label>
                             <input type="number" class="form-control" id="precio1" @bind="precioProducto2" />
                         </div>
                         <div class="mb-3">
-                            <label for="precioProducto" class="form-label generic-label">Precio especial</label>
+                            <label for="precioEspecial" class="form-label generic-label">Precio especial</label>
                             <input type="number" class="form-control" id="precioEspecial" @bind="precioEspecialProducto" />
                         </div>
                         <div class="mb-3">
                             <label for="cantidadProducto" class="form-label generic-label">Cantidad</label>
                             <input type="number" class="form-control" id="cantidadProducto" @bind="cantidadProducto" />
                         </div>
+
+                        <!-- Botón para abrir el modal de personalización -->
+                        <div class="mb-3">
+                            <label for="personalizacion" class="form-label">Personalización</label>
+                            <input type="checkbox" @bind="isPersonalizacion" />
+                        </div>
+
+                        @if (isPersonalizacion)
+                        {
+                            <button type="button" class="btn btn-info" @onclick="ShowPersonalizationModal">Configurar Personalización</button>
+                        }
                     </form>
                 </div>
                 <div class="modal-buttons">
@@ -102,18 +113,177 @@
     </div>
 }
 
+@if (isPersonalizationModalVisible)
+{
+    <!-- Modal de personalización (tallas, materiales, posiciones) -->
+    <div class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title titulos">Configurar Personalización</h5>
+                </div>
+                <div class="modal-body">
+                    <!-- Tallas -->
+                    <div class="mb-3">
+                        <h5>Tallas</h5>
+                        <form>
+                            <div class="form-group">
+                                <label>Nombre</label>
+                                <input type="text" id="codigo" class="form-control" @bind="NombreTalla" />
+                                <label>Precio</label>
+                                <input type="number" class="form-control" placeholder="Precio de talla"
+                                @bind="precioTalla" />
+                                <label>Precio Especial</label>
+                                <input type="number" class="form-control" placeholder="Precio de talla"
+                                @bind="precioTallaEspecial" />
+                            </div>
+                        </form>
+                        <button type="button" class="btn btn-primary" @onclick="AgregarTalla">Agregar</button>
+
+                    </div>
+
+                    <!-- Materiales -->
+                    <div class="mb-3">
+                        <h5>Materiales</h5>
+                        <form>
+                            <div class="form-group">
+                                <label>Nombre</label>
+                                <input type="text" id="codigo" class="form-control" @bind="NombreMaterial" />
+                                <label>Precio</label>
+                                <input type="number" class="form-control" placeholder="Precio de talla"
+                                @bind="precioMaterial" />
+                                <label>Precio Especial</label>
+                                <input type="number" class="form-control" placeholder="Precio de talla"
+                                @bind="precioMaterialEspecial" />
+                            </div>
+                        </form>
+                        <button type="button" class="btn btn-primary" @onclick="AgregarMaterial">Agregar</button>
+
+                    </div>
+
+                    <!-- Posiciones -->
+                    <div class="mb-3">
+                        <h5>Posiciones</h5>
+                        <form>
+                            <div class="form-group">
+                                <label>Nombre</label>
+                                <input type="text" id="codigo" class="form-control" @bind="NombrePosicion" />
+                                <label>Precio</label>
+                                <input type="number" class="form-control" placeholder="Precio de talla"
+                                @bind="precioPosicion" />
+                                <label>Precio Especial</label>
+                                <input type="number" class="form-control" placeholder="Precio de talla"
+                                @bind="precioPosicionEspecial" />
+                            </div>
+                        </form>
+                        <button type="button" class="btn btn-primary" @onclick="AgregarPosicion">Agregar</button>
+                    </div>
+                    <!-- Posiciones -->
+                    <div class="mb-3">
+                        @if (productosCrear.Tallas.Any())
+                        {
+                            <table class="tableModal" style="width: 60%;">
+                                <thead>
+                                    <tr>
+                                        <th>Nombre</th>
+                                        <th>Precio</th>
+                                        <th>Precio Especial</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var talla in productosCrear.Tallas)
+                                    {
+                                        <tr>
+                                            <td>@talla.Nombre</td>
+                                            <td>@talla.Precio</td>
+                                            <td>@talla.PrecioEspecial</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                        @if (productosCrear.Materiales.Any())
+                        {
+                            <table class="tableModal" style="width: 60%;">
+                                <thead>
+                                    <tr>
+                                        <th>Nombre</th>
+                                        <th>Precio</th>
+                                        <th>Precio Especial</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var material in productosCrear.Materiales)
+                                    {
+                                        <tr>
+                                            <td>@material.Nombre</td>
+                                            <td>@material.Precio</td>
+                                            <td>@material.PrecioEspecial</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                        @if (productosCrear.Posiciones.Any())
+                        {
+                            <table class="tableModal table-sm mt-2" style="width: 60%;">
+                                <thead>
+                                    <tr>
+                                        <th>Nombre</th>
+                                        <th>Precio</th>
+                                        <th>Precio Especial</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var posicion in productosCrear.Posiciones)
+                                    {
+                                        <tr>
+                                            <td>@posicion.NombrePosicion</td>
+                                            <td>@posicion.Precio</td>
+                                            <td>@posicion.PrecioEspecial</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                    </div>
+                </div>
+
+                <div class="modal-buttons">
+                    <button type="button" class="btn btn-secondary" @onclick="ClosePersonalizationModal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 
 @code {
     public List<Productos>? productos { get; set; }
+    public Productos productosCrear = new Productos();
     public string mensaje = "";
     private bool isModalVisible = false;
-    private string codigoProducto = string.Empty;
+    private bool modalAbierto = false;
+    private bool isPersonalizacion = false;
     private string nombreProducto = string.Empty;
-    private float precioProducto;
-    private int cantidadProducto;
+    private string NombreTalla = string.Empty;
+    private string NombrePosicion = string.Empty;
+    private string NombreMaterial = string.Empty;
     private string descripcionProducto = string.Empty;
+    private float precioProducto;
     private float precioProducto2;
     private float precioEspecialProducto;
+    private int cantidadProducto;
+    private int precioTalla;
+    private int precioTallaEspecial;
+    private int precioPosicion;
+    private int precioPosicionEspecial;
+    private int precioMaterial;
+    private int precioMaterialEspecial;
+    private bool isPersonalizationModalVisible = false;
+
+    private void ShowPersonalizationModal() => isPersonalizationModalVisible = true;
+    private void ClosePersonalizationModal() => isPersonalizationModalVisible = false;
 
 
     protected override async Task OnInitializedAsync()
@@ -127,7 +297,6 @@
         }
     }
 
-
     private void goBack()
     {
         navigation.NavigateTo("/");
@@ -140,61 +309,134 @@
 
     private void CloseModal()
     {
+        ResetForm();
         isModalVisible = false;
+    }
+
+    public async Task AgregarTalla()
+    {
+        var nuevaTalla = new Talla
+            {
+                Nombre = NombreTalla,
+                Precio = precioTalla,
+                PrecioEspecial = precioTallaEspecial
+            };
+        productosCrear.Tallas.Add(nuevaTalla);
+
+        // Limpiar los inputs
+        NombreTalla = string.Empty;
+        precioTalla = 0;
+        precioTallaEspecial = 0;
+
+        StateHasChanged();
+    }
+
+    public async Task AgregarMaterial()
+    {
+        var nuevaMaterial = new Material
+            {
+                Nombre = NombreMaterial,
+                Precio = precioMaterial,
+                PrecioEspecial = precioMaterialEspecial
+            };
+        productosCrear.Materiales.Add(nuevaMaterial);
+
+        // Limpiar los inputs
+        NombreMaterial = string.Empty;
+        precioMaterial = 0;
+        precioMaterialEspecial = 0;
+
+        StateHasChanged();
+    }
+
+    public async Task AgregarPosicion()
+    {
+        var nuevaPosicion = new Posicion
+            {
+                NombrePosicion = NombrePosicion,
+                Precio = precioPosicion,
+                PrecioEspecial = precioPosicionEspecial
+            };
+        productosCrear.Posiciones.Add(nuevaPosicion);
+
+        // Limpiar los inputs
+        NombrePosicion = string.Empty;
+        precioPosicion = 0;
+        precioPosicionEspecial = 0;
+
+        StateHasChanged();
+    }
+
+    private void ResetForm()
+    {
+        nombreProducto = string.Empty;
+        descripcionProducto = string.Empty;
+        precioProducto = 0;
+        precioProducto2 = 0;
+        precioEspecialProducto = 0;
+        cantidadProducto = 0;
     }
 
     private async Task AddProducto()
     {
-        if (!string.IsNullOrWhiteSpace(nombreProducto) && cantidadProducto > 0 && precioProducto > 0)
+        if (string.IsNullOrWhiteSpace(nombreProducto) || cantidadProducto <= 0 || precioProducto <= 0)
         {
-            var nuevoProducto = new Productos
-            {
-                    Nombre = nombreProducto,
-                    Descripcion = descripcionProducto,
-                    Precio1 = precioProducto,
-                    Precio2 = precioProducto2,
-                    PrecioEspecial = precioEspecialProducto,
-                    Cantidad = cantidadProducto
-            };
-
-            var response = await httpClient.PostAsJsonAsync("api/Productos", nuevoProducto);
-
-            if (response.IsSuccessStatusCode)
-            {
-                var Mensaje1 = new NotificationMessage
-                    {
-                        Severity = NotificationSeverity.Success,
-                        Summary = "Guardado",
-                        Detail = "Contacto guardado con exito",
-                        Duration = 1000
-                    };
-                notificationServices.Notify(Mensaje1);
-                await Task.Delay(1000);
-                await OnInitializedAsync();
-                CloseModal();
-            }
-            else
-            {
-                var Mensaje = new NotificationMessage
-                    {
-                        Severity = NotificationSeverity.Error,
-                        Summary = "Error al guardar",
-                        Detail = "Ha ocurrido un error",
-                        Duration = 1_000
-                    };
-                notificationServices.Notify(Mensaje);
-            }
-        }
-        else
-        {
-            var Mensaje = new NotificationMessage
+            notificationServices.Notify(new NotificationMessage
                 {
                     Severity = NotificationSeverity.Error,
                     Summary = "Error al guardar",
                     Detail = "Por favor completa todos los campos correctamente.",
-                    Duration = 1_000
-                };
-            notificationServices.Notify(Mensaje);
+                    Duration = 1000
+                });
+            return;
+        }
+
+        if (precioProducto < 0 || precioProducto2 < 0 || precioEspecialProducto < 0 || cantidadProducto < 0)
+        {
+            notificationServices.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Valores incorrectos",
+                    Detail = "Los precios y la cantidad no pueden ser negativos.",
+                    Duration = 2000
+                });
+            return;
+        }
+
+        productosCrear.Nombre = nombreProducto;
+        productosCrear.Descripcion = descripcionProducto;
+        productosCrear.Precio1 = precioProducto;
+        productosCrear.Precio2 = precioProducto2;
+        productosCrear.PrecioEspecial = precioEspecialProducto;
+        productosCrear.Cantidad = cantidadProducto;
+
+        var response = await httpClient.PostAsJsonAsync("api/Productos", productosCrear);
+
+        if (response.IsSuccessStatusCode)
+        {
+            notificationServices.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Success,
+                    Summary = "Guardado",
+                    Detail = "Producto guardado con éxito",
+                    Duration = 1000
+                });
+            await Task.Delay(1000);
+            await OnInitializedAsync();
+            productosCrear = new Productos();
+            CloseModal();  
+        }
+        else
+        {
+            notificationServices.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error al guardar",
+                    Detail = "Ha ocurrido un error al guardar el producto.",
+                    Duration = 1000
+                });
         }
     }
+
+
 }

@@ -39,6 +39,34 @@
         background-color: #e6e6e6;
     }
 
+.tableModal {
+    width: 10%;
+    border-radius: 6px;
+    margin-top: 1px;
+}
+
+    .tableModal th {
+        background-color: #bff0b1;
+        color: #000;
+        padding: 5px;
+        font-size: 10px;
+        text-align: center;
+    }
+
+    .tableModal td {
+        text-align: center;
+        padding: 10px;
+        font-size: 10px;
+    }
+
+    .tableModal tr:nth-child(odd) {
+        background-color: #f2f2f2;
+    }
+
+    .tableModal tr:nth-child(even) {
+        background-color: #e6e6e6;
+    }
+
 .add-button {
     width: 80px;
     height: 80px;
@@ -131,20 +159,47 @@
     left: 0;
     width: 100%;
     height: 100%;
+    background: rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
 }
 
 .modal-box {
-    background-color: #fff;
-    border: 1px solid black;
-    border-radius: 10px;
-    padding: 20px;
+    background: #fff;
+    width: 60%; /* Aumentar el ancho del modal */
+    max-width: 800px; /* Establecer un máximo para evitar que sea demasiado grande */
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+.modal-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-body {
+    display: flex;
+    flex-wrap: wrap; /* Permite que los elementos se ajusten automáticamente */
+    gap: 15px;
+}
+
+    .modal-body .mb-3 {
+        flex: 1 1 calc(50% - 15px); /* Dos columnas con margen */
+        min-width: 250px;
+    }
+
+.modal-header {
     text-align: center;
-    width: 400px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
 }
 
 .modal-buttons button {
@@ -160,4 +215,20 @@
     font-size: 1.5em;
     margin-bottom: 15px;
     color: #333;
+}
+
+.mb-3 {
+    flex: 1 1 calc(50% - 15px); /* Hace que los elementos ocupen la mitad del ancho */
+    min-width: 250px; /* Tamaño mínimo */
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+.modal-body form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px; /* Espacio entre los elementos */
 }
